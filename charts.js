@@ -84,7 +84,7 @@ function buildCharts(sample) {
     var myOtu_ids = sorted_sample[0].otu_ids.slice(0, 10).reverse();  
     var myOtu_labels = sorted_sample[0].otu_labels.slice(0, 10).reverse(); 
     
-    console.log(myValues);
+    // console.log(myValues);
       
 
     // 7. Create the yticks for the bar chart.
@@ -116,6 +116,43 @@ function buildCharts(sample) {
     // 10. Use Plotly to plot the data with the layout. 
     // debug - uncomment the next line after using console to verify the data
     Plotly.newPlot("bar", barData, barLayout);
+
+    // Bar and Bubble charts
+
+    // for bubble charts use the unsorted sample instead of sorted or the colors are the same
     
+    var myBubbleValues = mySample[0].sample_values;
+    var myBubbleOtu_ids = mySample[0].otu_ids;  
+    var myBubbleOtu_labels = mySample[0].otu_labels; 
+
+    console.log(myBubbleOtu_ids);
+
+    //  11. Create the trace for the bubble chart.
+    // note that this the whole sample not just the top 10 and it does not have to be 
+    // colors- i only have the first 4 and it still lets me build the chart
+    // do I need to generate a list of random colors the same number of entries as the list?
+    var bubbleData = [
+      {
+      x: myBubbleOtu_ids,
+      y: myBubbleValues,
+      // for labels do I want the list or just the first entry?
+      text: myBubbleOtu_labels, 
+      type: "bubble",
+      mode: 'markers',
+      marker: {
+        // color: ['rgb(93, 164, 214)', 'rgb(255, 144, 14)',  'rgb(44, 160, 101)', 'rgb(255, 65, 54)'],
+        color: myBubbleOtu_ids, 
+        size: myBubbleValues
+        }
+      }
+    ];
+
+    // 12. Create the layout for the bubble chart.
+    var bubbleLayout = {
+      title: "Bacteria Cultures Per Sample"
+    };
+
+    // 13. Use Plotly to plot the data with the layout.
+    Plotly.newPlot("bubble", bubbleData, bubbleLayout); 
   });
-}
+};
