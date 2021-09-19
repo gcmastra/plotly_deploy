@@ -24,7 +24,7 @@ function init() {
 init();
 
 // set global variable to hold wash frequency
-global_wfreq = 2.0;
+var global_wfreq = 2.0;
 
 function optionChanged(newSample) {
   // Fetch new data each time a new sample is selected
@@ -43,8 +43,9 @@ function buildMetadata(sample) {
     var result = resultArray[0];
 
     // console.log(result);
+
     // set the global variable to use in the gauge chart in a different function
-    global_wfreq = result.wfreq;
+    global_wfreq = result.wfreq - 0.0;
     if (global_wfreq == null) { 
       global_wfreq = 0.0
     };
@@ -136,8 +137,13 @@ function buildCharts(sample) {
     var myBubbleValues = mySample[0].sample_values;
     var myBubbleOtu_ids = mySample[0].otu_ids;  
     var myBubbleOtu_labels = mySample[0].otu_labels; 
+    // Attempt to make colors span the whole rainbow spectrum - still in progress
     var colornums = myBubbleOtu_ids.map(function(num){
-      return num * 2;
+      return Math.min(num * 0.0002, 1.0) ;
+    });
+    // restrict bubble sizes to a reasonable size to fit in the chart
+    var bubbleSizes = myBubbleValues.map(function(num){
+      return Math.min(num * 2, 100) ;
     });
 
     // console.log(colornums);
@@ -156,7 +162,8 @@ function buildCharts(sample) {
       mode: 'markers',
       marker: {
         color: colornums, 
-        size: myBubbleValues
+        size: bubbleSizes,
+        colorscale: "BlueGreen"
       }
       }
     ];
@@ -191,10 +198,17 @@ function buildCharts(sample) {
       type: "indicator",
 		  mode: "gauge+number",
       gauge: {
-        axis: { range: [null, 10] }
+        axis: { range: [null, 10] },
+        steps: [
+          { range: [0, 2], color: "red" },
+          { range: [2, 4], color: "orange" },
+          { range: [4, 6], color: "yellow" },
+          { range: [6, 8], color: "lightgreen" },
+          { range: [8, 10], color: "green" }        
+          ] // steps       
         }
-      }
-    ];
+      }  // gauge
+    ]; //gaugeData
     
     // 15. Create the layout for the gauge chart.
     var gaugeLayout = { 
