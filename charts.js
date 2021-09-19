@@ -23,6 +23,9 @@ function init() {
 // Initialize the dashboard
 init();
 
+// set global variable to hold wash frequency
+global_wfreq = 2.0;
+
 function optionChanged(newSample) {
   // Fetch new data each time a new sample is selected
   buildMetadata(newSample);
@@ -38,6 +41,15 @@ function buildMetadata(sample) {
     // Filter the data for the object with the desired sample number
     var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
     var result = resultArray[0];
+
+    // console.log(result);
+    // set the global variable to use in the gauge chart in a different function
+    global_wfreq = result.wfreq;
+    if (global_wfreq == null) { 
+      global_wfreq = 0.0
+    };
+  
+
     // Use d3 to select the panel with id of `#sample-metadata`
     var PANEL = d3.select("#sample-metadata");
 
@@ -124,8 +136,11 @@ function buildCharts(sample) {
     var myBubbleValues = mySample[0].sample_values;
     var myBubbleOtu_ids = mySample[0].otu_ids;  
     var myBubbleOtu_labels = mySample[0].otu_labels; 
+    var colornums = myBubbleOtu_ids.map(function(num){
+      return num * 2;
+    });
 
-    console.log(myBubbleOtu_ids);
+    // console.log(colornums);
 
     //  11. Create the trace for the bubble chart.
     // note that this the whole sample not just the top 10 and it does not have to be 
@@ -140,19 +155,54 @@ function buildCharts(sample) {
       type: "bubble",
       mode: 'markers',
       marker: {
-        // color: ['rgb(93, 164, 214)', 'rgb(255, 144, 14)',  'rgb(44, 160, 101)', 'rgb(255, 65, 54)'],
-        color: myBubbleOtu_ids, 
+        color: colornums, 
         size: myBubbleValues
-        }
+      }
       }
     ];
 
     // 12. Create the layout for the bubble chart.
     var bubbleLayout = {
-      title: "Bacteria Cultures Per Sample"
+      title: "Bacteria Cultures Per Sample",
+      x_axis_title: "OTU ID",
     };
 
     // 13. Use Plotly to plot the data with the layout.
     Plotly.newPlot("bubble", bubbleData, bubbleLayout); 
+    
+    // look up the wfreq to use in the gauge chart below, for now use a fixed number for testing
+    // var wfreq = d3.select("WFREQ").text
+    // var wfreq = 2.0;
+
+    // var metadata = data.metadata;
+    // Filter the data for the object with the desired sample number
+    // borrowed code from buildMetadata - need to do it again because function was 
+    // var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);
+    // var result = resultArray[0];
+    // var wfreq = result.wfreq;
+    var wfreq = global_wfreq;
+
+    // 14. Create the trace for the gauge chart.
+    var gaugeData = [
+      {
+      // domain: { x: [0, 10], y: [0, 10] },
+  		value: global_wfreq,
+      //wfreq, global var metadata.wfreq from buildMetadata function
+      type: "indicator",
+		  mode: "gauge+number",
+      gauge: {
+        axis: { range: [null, 10] }
+        }
+      }
+    ];
+    
+    // 15. Create the layout for the gauge chart.
+    var gaugeLayout = { 
+      title: "Belly Button Washing Frequency"
+     
+    };
+
+    // 16. Use Plotly to plot the gauge data and layout.
+    Plotly.newPlot("gauge", gaugeData, gaugeLayout);
   });
 };
